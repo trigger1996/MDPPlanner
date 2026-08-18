@@ -2,7 +2,10 @@
 
 from math import sqrt
 from networkx.classes.digraph import DiGraph
-from networkx import strongly_connected_components_recursive
+try:
+    from networkx import strongly_connected_components_recursive
+except ImportError:  # NetworkX >= 3.0 removed the recursive alias.
+    from networkx import strongly_connected_components as strongly_connected_components_recursive
 
 # ----------------------------------
 

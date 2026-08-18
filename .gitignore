@@ -5,3 +5,4 @@ gurobi.log
 .DS_Store
 *.p
 *.log
+\[paper\]MDP-LTL-Opacity/

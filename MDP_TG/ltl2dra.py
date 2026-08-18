@@ -29,14 +29,31 @@ from .promela import Parser
 #     (output, _) = ascii_decoder(raw_output)
 #     return output
 def run_ltl2dra(formula):
-    ltl2dra_path = "/usr/bin/ltl2dstar"
-    ltl2ba_path = "/usr/bin/ltl2ba"
+    # Use the binaries shipped with this repository.  The former hard-coded
+    # /usr/bin paths made a fresh checkout fail even when both tools existed.
+    tool_dir = dirname(__file__)
+    ltl2dra_path = os.environ.get("LTL2DSTAR_PATH", join(tool_dir, "ltl2dstar"))
+    ltl2ba_path = os.environ.get("LTL2BA_PATH", join(tool_dir, "ltl2ba"))
 
-    cmd = [
-        ltl2dra_path,
-        f"--ltl2nba=spin:{ltl2ba_path}",
-        "--stutter=no", "-", "-"
-    ]
+    if os.name == "nt":
+        def wsl_path(path):
+            path = abspath(path).replace("\\", "/")
+            return "/mnt/" + path[0].lower() + path[2:]
+
+        ltl2dra_wsl = wsl_path(ltl2dra_path)
+        ltl2ba_wsl = wsl_path(ltl2ba_path)
+        cmd = [
+            "wsl.exe", "-d", "Ubuntu-22.04", "--",
+            ltl2dra_wsl,
+            f"--ltl2nba=spin:{ltl2ba_wsl}",
+            "--stutter=no", "-", "-"
+        ]
+    else:
+        cmd = [
+            ltl2dra_path,
+            f"--ltl2nba=spin:{ltl2ba_path}",
+            "--stutter=no", "-", "-"
+        ]
 
     env = os.environ.copy()
     env["PATH"] = "/usr/local/bin:/usr/bin:" + env["PATH"]

@@ -2,7 +2,10 @@
 
 from networkx.classes.digraph import DiGraph
 from networkx import single_source_shortest_path
-from ortools.linear_solver import pywraplp
+try:
+    from ortools.linear_solver import pywraplp
+except ImportError:  # Graph construction can run without the optional LP backend.
+    pywraplp = None
 from copy import deepcopy
 from User.vis2 import print_c
 
@@ -132,7 +135,10 @@ def syn_full_plan(prod_mdp, gamma, alpha=1):
                 plan.append([[plan_prefix, prefix_cost, prefix_risk, y_in_sf], [
                             plan_suffix, suffix_cost, suffix_risk], [MEC[0], MEC[1], Sr, Sd]])
         if plan:
-            best_k_plan = min(plan, key=lambda p: p[0][1] + alpha*p[1][1])
+            best_k_plan = min(
+                plan,
+                key=lambda p: (p[0][1] + alpha*p[1][1], repr(p[2][0])),
+            )
             Plan.append(best_k_plan)
         else:
             print("No valid found!")
@@ -202,7 +208,10 @@ def syn_full_plan_rex(prod_mdp, gamma, d, alpha=1):
         print(" || Final compilation  ||")
         print("=========================")
         try:
-            best_all_plan = min(Plan, key=lambda p: p[0][1] + alpha*p[1][1])
+            best_all_plan = min(
+                Plan,
+                key=lambda p: (p[0][1] + alpha*p[1][1], repr(p[2][0])),
+            )
         except:
             print("[syn_full_plan_rex] NO VALID PLAN prefix of suffix ... !")           # Added
             return None
@@ -252,8 +261,9 @@ def syn_plan_prefix(prod_mdp, MEC, gamma):
         #
         # ip <- MEC[1] 这个东西应该是MEC本身的状态
         # 之所以可以用随机状态，是因为MEC内的状态是可以互相到达的，所以只要一个能到剩下都能到
+        ip_anchor = min(ip, key=repr)
         path = single_source_shortest_path(
-            simple_digraph, random.sample(ip, 1)[0])                                     # 求解出来是可以到达product_mdp中可以到达ip的状态, 对应论文中Sc
+            simple_digraph, ip_anchor)                                                   # deterministic anchor in the strongly connected MEC
         reachable_set = set(path.keys())                                                    # Sc
         print('States that can reach sf, size: %s' % str(len(reachable_set)))
         Sd = Sn.difference(reachable_set)                                                   # Sn \backslash { Sc } -> 不在MEC内，可由s0到达的状态除去可以到达ip的状态, 这个就是论文的Sd
@@ -1301,8 +1311,9 @@ def syn_plan_comb(prod_mdp, S_fi, gamma, alpha):
         ip_set = set()
         for mec in S_fi:
             ip = mec[1]
+            ip_anchor = min(ip, key=repr)
             path = single_source_shortest_path(
-                simple_digraph, random.sample(ip, 1)[0])
+                simple_digraph, ip_anchor)
             reachable_set.update(set(path.keys()))
             ip_set.update(ip)
         print('States that can reach Sf, size: %s' % str(len(reachable_set)))

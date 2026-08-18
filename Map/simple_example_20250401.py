@@ -6,7 +6,10 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../MDP_Planner'))
 from MDP_TG.mdp import Motion_MDP
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
+try:
+    import seaborn as sns
+except ImportError:  # Optional; only required by histogram helpers.
+    sns = None
 
 robot_nodes_w_aps = dict()
 robot_edges = dict()

@@ -6,7 +6,10 @@ import textwrap
 
 from collections import Counter, deque
 from networkx import MultiDiGraph
-from networkx import strongly_connected_components_recursive
+try:
+    from networkx import strongly_connected_components_recursive
+except ImportError:  # NetworkX >= 3 removed the recursive alias.
+    from networkx import strongly_connected_components as strongly_connected_components_recursive
 from MDP_TG.dra import Product_Dra
 from User.dra3 import product_mdp3
 from User.dra3 import obtain_differential_expected_cost, is_state_satisfy_ap, is_ap_satisfy_opacity
@@ -59,7 +62,8 @@ def find_MECs(mdp, Sneg):
                         if not A[s]:
                             R.add(s)
             while R:
-                s = R.pop()
+                s = min(R, key=repr)
+                R.remove(s)
                 T_temp.remove(s)
                 for f in mdp.predecessors(s):
                     if f in T_temp:
@@ -241,7 +245,8 @@ class product_team_mdp3(product_mdp3):
                         print('S_fii added to S_fi!!, size: %s' % len(T))
                     if len(T) == 1:  # self-loop
                         common_cp = common.copy()
-                        s = common_cp.pop()
+                        s = min(common_cp, key=repr)
+                        common_cp.remove(s)
                         if self.has_edge(s, s):                             # Added
                             loop_act_set = set(self[s][s]['prop'].keys())
                             loop_act = dict()
@@ -525,8 +530,8 @@ class product_team_mdp3(product_mdp3):
                     debug_var = 2
 
                 # 添加转移
-                next_observed_states = tuple(set(next_observed_states))
-                next_states_3        = tuple(set(next_states_3))
+                next_observed_states = tuple(sorted(set(next_observed_states), key=repr))
+                next_states_3        = tuple(sorted(set(next_states_3), key=repr))
                 next_sync_state = (next_state_pi, next_observed_states, next_states_3, )
                 #
                 mapping_t = {}
@@ -567,8 +572,8 @@ class product_team_mdp3(product_mdp3):
                         next_states_3 = list()
                         next_states_3 = next_states_3 + list(observed_state_t[2])
                         #
-                        next_observed_states = tuple(set(next_observed_states))
-                        next_states_3 = tuple(set(next_states_3))
+                        next_observed_states = tuple(sorted(set(next_observed_states), key=repr))
+                        next_states_3 = tuple(sorted(set(next_states_3), key=repr))
                         next_sync_state = (next_state_pi, next_observed_states, next_states_3,)
                         #
                         mapping_t[observed_state_t] = next_sync_state
@@ -761,8 +766,8 @@ class product_team_mdp3(product_mdp3):
                     trans_pr_cost_list[action] = (prob, cost)  # it is evident that this only corresponds to state_pi
 
                 # 添加转移
-                next_observed_states = tuple(set(next_observed_states))
-                next_states_3 = tuple(set(next_states_3))
+                next_observed_states = tuple(sorted(set(next_observed_states), key=repr))
+                next_states_3 = tuple(sorted(set(next_states_3), key=repr))
                 next_sync_state = (next_state_pi, next_observed_states, next_states_3,)
                 #
                 mapping_t = {}
@@ -774,8 +779,8 @@ class product_team_mdp3(product_mdp3):
                         next_states_3 = list()
                         next_states_3 = next_states_3 + list(observed_state_t[2])
                         #
-                        next_observed_states = tuple(set(next_observed_states))
-                        next_states_3 = tuple(set(next_states_3))
+                        next_observed_states = tuple(sorted(set(next_observed_states), key=repr))
+                        next_states_3 = tuple(sorted(set(next_states_3), key=repr))
                         next_sync_state = (next_state_pi, next_observed_states, next_states_3,)
                         #
                         mapping_t[observed_state_t] = next_sync_state

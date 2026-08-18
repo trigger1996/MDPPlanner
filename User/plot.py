@@ -91,7 +91,7 @@ def plot_cost_hists_multi(*cost_lists, bins=25, colors=None, labels=None,
     '''
     for i, cost_list in enumerate(cost_lists):
         data = extract_data(cost_list)
-        sns.histplot(data, bins=bins, kde=True, color=colors[i], edgecolor=colors[i],
+        sns.histplot(data, bins=bins, kde=False, color=colors[i], edgecolor=colors[i],
                      label=labels[i], stat="probability", alpha=0.6)
 
     # # 标题 & 标签字体
@@ -158,10 +158,10 @@ def plot_cost_hists_together_4_comparision(cost_groups, bins=25,
         data_gamma = extract_data(cost_gamma)
 
         # 画pi（透明度稍低），再画 gamma（图像在上层）
-        sns.histplot(data_pi, bins=bins, kde=True, color=colors_pi[i], edgecolor=colors_pi[i],
+        sns.histplot(data_pi, bins=bins, kde=False, color=colors_pi[i], edgecolor=colors_pi[i],
                      label=labels_pi[i], stat="probability", alpha=0.4, linewidth=1.5)
 
-        sns.histplot(data_gamma, bins=bins, kde=True, color=colors_gamma[i], edgecolor=colors_gamma[i],
+        sns.histplot(data_gamma, bins=bins, kde=False, color=colors_gamma[i], edgecolor=colors_gamma[i],
                      label=labels_gamma[i], stat="probability", alpha=0.6, linewidth=1.5)
 
     #
@@ -250,13 +250,13 @@ def plot_cost_hists_together_4_comparision_multi_groups(
 
         ax = axs[0][i]
 
-        h1 = sns.histplot(data_pi1, bins=bins, kde=True, color=colors_pi[2 * i], edgecolor=colors_pi[2 * i],
+        h1 = sns.histplot(data_pi1, bins=bins, kde=False, color=colors_pi[2 * i], edgecolor=colors_pi[2 * i],
                           label=labels_pi[i][0], stat="probability", alpha=0.4, ax=ax)
-        h2 = sns.histplot(data_gamma1, bins=bins, kde=True, color=colors_gamma[2 * i], edgecolor=colors_gamma[2 * i],
+        h2 = sns.histplot(data_gamma1, bins=bins, kde=False, color=colors_gamma[2 * i], edgecolor=colors_gamma[2 * i],
                           label=labels_gamma[i][0], stat="probability", alpha=0.6, ax=ax)
-        h3 = sns.histplot(data_pi2, bins=bins, kde=True, color=colors_pi[2 * i + 1], edgecolor=colors_pi[2 * i + 1],
+        h3 = sns.histplot(data_pi2, bins=bins, kde=False, color=colors_pi[2 * i + 1], edgecolor=colors_pi[2 * i + 1],
                           label=labels_pi[i][1], stat="probability", alpha=0.4, ax=ax)
-        h4 = sns.histplot(data_gamma2, bins=bins, kde=True, color=colors_gamma[2 * i + 1],
+        h4 = sns.histplot(data_gamma2, bins=bins, kde=False, color=colors_gamma[2 * i + 1],
                           edgecolor=colors_gamma[2 * i + 1],
                           label=labels_gamma[i][1], stat="probability", alpha=0.6, ax=ax)
 

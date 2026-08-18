@@ -2,10 +2,21 @@
 # -*- coding: utf-8 -*-
 import sys
 import os
+
+# Python randomizes hash/set iteration at process startup.  Re-exec once with
+# a fixed hash seed so solver graph traversal and LP variable order are stable.
+if os.environ.get("PYTHONHASHSEED") != "0":
+    os.environ["PYTHONHASHSEED"] = "0"
+    os.execv(sys.executable, [sys.executable, "-m",
+             "Case_Studies.repeated_test_plot.repeated_example_20250506_single_agent_main"] + sys.argv[1:])
+
 import time
+import argparse
+import random
+import numpy as np
 import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-matplotlib.use("TkAgg")
 #
 from functools import cmp_to_key
 from subprocess import check_output
@@ -64,13 +75,26 @@ def run_one_param_group(team_mdp, ltl_formula_converted, ap_list, param_group, m
 
 if __name__ == "__main__":
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--seed", type=int, default=None,
+                        help="Reproducible seed for MDP construction and simulation")
+    parser.add_argument("--output", type=str, default=None,
+                        help="PDF output path (default: Plot/0506_Cost_All.pdf)")
+    parser.add_argument("--quiet", action="store_true",
+                        help="Suppress extremely verbose trajectory diagnostics")
+    args = parser.parse_args()
+    if args.quiet:
+        sys.stdout = open(os.devnull, "w", encoding="utf-8")
     total_T = 150
     N = 500
     is_average = True
 
     ltl_formula = 'GF (gather -> (!gather U drop))'
     opt_prop = 'gather'
-    ltl_formula_converted = ltl_convert(ltl_formula)
+    # ltlfilt's ltl2dstar/LBT form for the fixed Spin-style formula above.
+    # Keeping it explicit makes seeded batch runs independent of a global
+    # Spot installation; the repository's ltl2dstar is invoked via WSL.
+    ltl_formula_converted = 'G F | ! gather U ! gather drop'
 
     mdp, initial_node, initial_label, node_positions = construct_single_agent_mdp(is_visualize=True)
     ap_list = obtain_all_aps_from_team_mdp(mdp)
@@ -102,6 +126,12 @@ if __name__ == "__main__":
         except RuntimeError as e:
             print_c(str(e), color='white', bg_color='red', style='bold')
             results.append(((param_group, None, None), (param_group, None)))
+
+    # Solver construction is deterministic.  Seed only the Monte Carlo phase
+    # so different seeds change trajectories, not synthesized policies.
+    if args.seed is not None:
+        random.seed(args.seed)
+        np.random.seed(args.seed)
 
     all_cost_groups = []
 
@@ -153,4 +183,9 @@ if __name__ == "__main__":
             is_average=is_average,
         )
 
-    plt.show()
+    output_path = os.path.abspath(args.output) if args.output else os.path.abspath(os.path.join(
+        os.path.dirname(__file__), "..", "..", "Plot", "0506_Cost_All.pdf"
+    ))
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    plt.savefig(output_path, bbox_inches="tight")
+    print_c(f"Histogram saved to {output_path}", color='white', bg_color='green', style='bold')

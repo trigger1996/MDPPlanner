@@ -11,7 +11,10 @@ from User.utils import print_c
 import math
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
+try:
+    import seaborn as sns
+except ImportError:  # Optional; not required for MDP construction/synthesis.
+    sns = None
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -486,4 +489,3 @@ def construct_team_mdp(is_visualize=False):
         visualize_grids_in_networkx(robot_nodes, robot_edges, grid_nodes, start_ids)
 
     return team_mdp, initial_node, initial_label, grid_nodes
-

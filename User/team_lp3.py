@@ -29,7 +29,7 @@ def get_action_from_successor_edge(g, s):
     act_list = []
     for sync_u, sync_v, attr in g.edges(s, data=True):
         act_list += list(attr['prop'].keys())
-    act_list = list(set(act_list))
+    act_list = sorted(set(act_list), key=repr)
     act_list.sort()
     return act_list
 
@@ -131,7 +131,7 @@ def syn_plan_prefix_in_sync_amec(prod_mdp, initial_subgraph, initial_sync_state,
                     # if not attr['is_opacity']:
                     #     continue
                     act_pi_list += list(attr['prop'].keys())
-                act_pi_list = list(set(act_pi_list))
+                act_pi_list = sorted(set(act_pi_list), key=repr)
                 for u in act_pi_list:
                     Y[(s, u)] = prefix_solver.NumVar(
                         0, 1000, 'y[(%s, %s)]' % (s, u))  # 下界，上界，名称
@@ -213,7 +213,7 @@ def syn_plan_prefix_in_sync_amec(prod_mdp, initial_subgraph, initial_sync_state,
                         if not attr['is_opacity']:                                      # TODO, to check, 好的状态只让走满足opacity的边
                             continue
                         act_pi_list += list(attr['prop'].keys())
-                    act_pi_list = list(set(act_pi_list))
+                    act_pi_list = sorted(set(act_pi_list), key=repr)
                     for u in act_pi_list:
                         node_y_out += Y[(s, u)]
                     #
@@ -247,7 +247,7 @@ def syn_plan_prefix_in_sync_amec(prod_mdp, initial_subgraph, initial_sync_state,
                             # 只有当这个动作通往的是 good 状态才保留
                             if sync_v in observer_mec_3[0]:                                  # TODO, to check
                                 act_pi_list.append(u)
-                    act_pi_list = list(set(act_pi_list))
+                    act_pi_list = sorted(set(act_pi_list), key=repr)
                     for u in act_pi_list:
                         node_y_out += Y[(s, u)]
                     #
@@ -317,7 +317,7 @@ def syn_plan_prefix_in_sync_amec(prod_mdp, initial_subgraph, initial_sync_state,
                     # 这边就不用is_opacity了
                     U_total += list(attr['prop'].keys())
                     #
-                U_total = list(set(U_total))
+                U_total = sorted(set(U_total), key=repr)
                 U_total.sort()
                 for u in U_total:
                     if type(Y[(s, u)]) == float:
@@ -519,7 +519,7 @@ def synthesize_suffix_cycle_in_sync_amec3(prod_mdp, sync_amec_graph, sync_mec_3,
                         # if not attr['is_opacity']:
                         #     continue
                         act_pi_list += list(attr['prop'].keys())
-                    act_pi_list = list(set(act_pi_list))
+                    act_pi_list = sorted(set(act_pi_list), key=repr)
                     for u in act_pi_list:
                         Y[(s, u)] = suffix_solver.NumVar(
                             0, 1000, 'y[(%s, %s)]' % (s, u))  # 下界，上界，名称
@@ -538,7 +538,7 @@ def synthesize_suffix_cycle_in_sync_amec3(prod_mdp, sync_amec_graph, sync_mec_3,
                         # if not attr['is_opacity']:
                         #     continue
                         act_pi_list += list(attr['prop'].keys())
-                    act_pi_list = list(set(act_pi_list))
+                    act_pi_list = sorted(set(act_pi_list), key=repr)
                     for u in act_pi_list:
                         for t in opaque_full_graph.successors(s):
                             for key_t in opaque_full_graph[s][t]:
@@ -874,7 +874,7 @@ def synthesize_suffix_cycle_in_sync_amec3(prod_mdp, sync_amec_graph, sync_mec_3,
                     # 这边就不用is_opacity了
                     U_total += list(attr['prop'].keys())
                     #
-                U_total = list(set(U_total))
+                U_total = sorted(set(U_total), key=repr)
                 U_total.sort()
                 for u in U_total:
                     if type(Y[(s, u)]) == float:
@@ -961,7 +961,7 @@ def synthesize_suffix_cycle_in_sync_amec3(prod_mdp, sync_amec_graph, sync_mec_3,
                             else:
                                 U_total_p_bad  += list(attr['prop'].keys())
                         #
-                        U_total_p_good = list(set(U_total_p_good))
+                        U_total_p_good = sorted(set(U_total_p_good), key=repr)
                         U_total_p_good.sort()
                         for u in U_total_p_good:
                             U.append(u)
@@ -969,7 +969,7 @@ def synthesize_suffix_cycle_in_sync_amec3(prod_mdp, sync_amec_graph, sync_mec_3,
                         #
                         # TODO
                         # 这个会影响概率连贯性?
-                        U_total_p_bad = list(set(U_total_p_bad))
+                        U_total_p_bad = sorted(set(U_total_p_bad), key=repr)
                         U_total_p_bad.sort()
                         for u in U_total_p_bad:
                             U.append(u)
@@ -1049,14 +1049,14 @@ def synthesize_full_plan_w_opacity3(mdp, task, optimizing_ap, ap_list, risk_pr, 
 
     # new main loop
     plan = []
-    for l, S_fi_pi in enumerate(prod_dra_pi.Sf):  # prod_mdp.Sf 对应所有的AMEC
+    for l, S_fi_pi in enumerate(sorted(prod_dra_pi.Sf, key=repr)):  # stable AMEC order
         print("---for one S_fi---")
-        for k, MEC_pi in enumerate(S_fi_pi):
+        for k, MEC_pi in enumerate(sorted(S_fi_pi, key=repr)):
             #
             # finding states that satisfying optimizing prop
             S_pi = find_states_satisfying_opt_prop(optimizing_ap, MEC_pi[0])
 
-            for ap_4_opacity in ap_list:
+            for ap_4_opacity in sorted(ap_list, key=repr):
                 if ap_4_opacity == optimizing_ap:
                     continue
                 # synthesize product mdp for opacity
@@ -1067,8 +1067,8 @@ def synthesize_full_plan_w_opacity3(mdp, task, optimizing_ap, ap_list, risk_pr, 
                 prod_dra_gamma.compute_S_f()  # for AMECs
 
                 #
-                for p, S_fi_gamma in enumerate(prod_dra_gamma.Sf):
-                    for q, MEC_gamma in enumerate(S_fi_gamma):
+                for p, S_fi_gamma in enumerate(sorted(prod_dra_gamma.Sf, key=repr)):
+                    for q, MEC_gamma in enumerate(sorted(S_fi_gamma, key=repr)):
                         if ap_4_opacity == 'recharge':
                             debug_var = 1
 
@@ -1143,7 +1143,14 @@ def synthesize_full_plan_w_opacity3(mdp, task, optimizing_ap, ap_list, risk_pr, 
                and p[0][1] is not None and p[1][1] is not None
         ]
         try:
-            best_all_plan = min(valid_plans, key=lambda p: p[0][1] + alpha * p[1][1])
+            best_all_plan = min(
+                valid_plans,
+                key=lambda p: (
+                    p[0][1] + alpha * p[1][1],
+                    repr(p[3][0]),
+                    repr(p[2][0]),
+                ),
+            )
         except:
             print_c("[team LP3] NO VALID PLAN FOUND !", color='red', style='bold')
             return None, prod_dra_pi

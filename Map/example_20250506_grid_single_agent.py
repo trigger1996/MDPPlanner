@@ -12,7 +12,10 @@ from User.utils import print_c
 import math
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
+try:
+    import seaborn as sns
+except ImportError:  # Optional; not required for MDP construction/synthesis.
+    sns = None
 
 import networkx as nx
 import matplotlib.pyplot as plt

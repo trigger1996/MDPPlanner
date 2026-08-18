@@ -2,10 +2,20 @@
 # -*- coding: utf-8 -*-
 import sys
 import os
+
+# Stabilize set/frozenset iteration before importing graph and solver modules.
+if os.environ.get("PYTHONHASHSEED") != "0":
+    os.environ["PYTHONHASHSEED"] = "0"
+    os.execv(sys.executable, [sys.executable, "-m",
+             "Case_Studies.repeated_test_plot.repeated_example_20250426_main"] + sys.argv[1:])
+
 import time
+import argparse
+import random
+import numpy as np
 import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-matplotlib.use("TkAgg")
 #
 from functools import cmp_to_key
 from subprocess import check_output
@@ -65,6 +75,17 @@ def run_one_param_group(team_mdp, ltl_formula_converted, ap_list, param_group, m
 
 if __name__ == "__main__":
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--seed", type=int, default=None,
+                        help="Seed for Monte Carlo simulation only")
+    parser.add_argument("--output", type=str, default=None,
+                        help="PDF output path (default: Plot/0426_Cost_All.pdf)")
+    parser.add_argument("--quiet", action="store_true",
+                        help="Suppress extremely verbose trajectory diagnostics")
+    args = parser.parse_args()
+    if args.quiet:
+        sys.stdout = open(os.devnull, "w", encoding="utf-8")
+
     total_T = 150
     N = 500
     is_average = True
@@ -74,7 +95,7 @@ if __name__ == "__main__":
 
     ltl_formula = 'GF (gather -> (!gather U drop))'
     opt_prop = 'gather'
-    ltl_formula_converted = ltl_convert(ltl_formula)
+    ltl_formula_converted = 'G F | ! gather U ! gather drop'
 
 
     # gamma = 0.125
@@ -101,6 +122,11 @@ if __name__ == "__main__":
         except RuntimeError as e:
             print_c(str(e), color='white', bg_color='red', style='bold')
             results.append(((param_group, None, None), (param_group, None)))
+
+    # Keep policy synthesis deterministic and seed only trajectory sampling.
+    if args.seed is not None:
+        random.seed(args.seed)
+        np.random.seed(args.seed)
 
     all_cost_groups = []
 
@@ -152,4 +178,9 @@ if __name__ == "__main__":
             is_average=is_average,
         )
 
-    plt.show()
+    output_path = os.path.abspath(args.output) if args.output else os.path.abspath(os.path.join(
+        os.path.dirname(__file__), "..", "..", "Plot", "0426_Cost_All.pdf"
+    ))
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    plt.savefig(output_path, bbox_inches="tight")
+    print_c(f"Histogram saved to {output_path}", color='white', bg_color='green', style='bold')
