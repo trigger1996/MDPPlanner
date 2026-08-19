@@ -233,7 +233,7 @@ def plot_cost_hists_together_4_comparision_multi_groups(
     if titles is None:
         titles = [f"$\\mathbf{{Group\\ {i + 1}}}$" for i in range(num_groups)]
 
-    fig, axs = plt.subplots(nrows=1, ncols=num_groups, figsize=(7 * num_groups, 5), squeeze=False)
+    fig, axs = plt.subplots(nrows=1, ncols=num_groups, figsize=(8 * num_groups, 5), squeeze=False)
 
     handles_all = []
     labels_all = []
@@ -276,11 +276,14 @@ def plot_cost_hists_together_4_comparision_multi_groups(
         ax.legend().remove()  # 移除单独图例
 
     # 设置统一 legend
-    fig.legend(handles_all, labels_all, loc='center right', fontsize=14, frameon=False)
+    # One complete set is sufficient; repeated labels waste the legend column
+    # and are a common cause of text being clipped in the exported PDF.
+    unique = dict(zip(labels_all, handles_all))
+    fig.legend(unique.values(), unique.keys(), loc='center right', fontsize=14, frameon=False)
 
     # 添加统一 x/y label
     fig.text(0.5, 0.04, xlabel, ha='center', fontsize=18)
     fig.text(0.06, 0.5, ylabel, va='center', rotation='vertical', fontsize=18)
 
     # 调整 layout，留出下方 x-label、左侧 y-label、右侧 legend 空间
-    plt.tight_layout(rect=[0.1, 0.08, 0.88, 1])
+    plt.tight_layout(rect=[0.07, 0.10, 0.82, 0.97])

@@ -154,8 +154,8 @@ if __name__ == "__main__":
 
         all_cost_groups.append([[cost_list_pi, cost_list_gamma], [cost_list_pi_p, cost_list_gamma_p]])
 
-    labels_pi = [[r"$\pi$ opaque", r"$\pi$ non-opaque"]] * len(all_cost_groups)
-    labels_gamma = [[r"$\gamma$ opaque", r"$\gamma$ non-opaque"]] * len(all_cost_groups)
+    labels_pi = [[r"$\pi$ in opaque run", r"$\pi$ in non-opaque run"]] * len(all_cost_groups)
+    labels_gamma = [[r"$\gamma$ in opaque run", r"$\gamma$ in non-opaque run"]] * len(all_cost_groups)
     #titles = [f"Param Group {i+1}" for i in range(len(all_cost_groups))]
     titles = [f"" for i in range(len(all_cost_groups))]
 
@@ -187,5 +187,5 @@ if __name__ == "__main__":
         os.path.dirname(__file__), "..", "..", "Plot", "0506_Cost_All.pdf"
     ))
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    plt.savefig(output_path, bbox_inches="tight")
+    plt.savefig(output_path, bbox_inches="tight", pad_inches=0.25)
     print_c(f"Histogram saved to {output_path}", color='white', bg_color='green', style='bold')
